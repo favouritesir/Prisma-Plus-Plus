@@ -1,0 +1,30 @@
+{
+  "name": "prisma-plus-plus",
+  "version": "1.0.0",
+  "description": "Write clean, readable, and meaningful code effortlessly with Prisma++.",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "nodemon --exec tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/favouritesir/Prisma-Plus-Plus.git"
+  },
+  "keywords": [
+    "PPP",
+    "prisma++",
+    "prisma-pp",
+    "prisma plus plus"
+  ],
+  "author": "Ashikur Rahman",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/favouritesir/Prisma-Plus-Plus/issues"
+  },
+  "homepage": "https://github.com/favouritesir/Prisma-Plus-Plus#readme",
+  "dependencies": {
+    "@prisma/client": "^5.21.1"
+  }
+}
