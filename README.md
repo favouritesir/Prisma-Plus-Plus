@@ -133,7 +133,7 @@ const usersTable = new PPP({ table: prisma.users });
   });
 
   /**************************************************** Make page for a range of data & select some field with multipe order */
-  const pages = usersTable.setPageSize(10).if("4>id>=75"); // we can save specific pages
+  const pages = usersTable.setPageSize(10).if("4<id<=75"); // we can save specific pages
   const orderById = pages.ascBy(["id"]);
   const dsecOrderById = pages.descBy(["id"]);
 
@@ -143,8 +143,12 @@ const usersTable = new PPP({ table: prisma.users });
 
   // or in prisma
   data = await prisma.users.findMany({
-    skip: 4,
-    take: 70,
+    where: {
+      id: {
+        gt: 4,
+        lte: 75,
+      },
+    },
     orderBy: [{ id: "asc" }],
     select: {
       email: true,
@@ -159,6 +163,12 @@ const usersTable = new PPP({ table: prisma.users });
   data = await prisma.users.findMany({
     skip: 24,
     take: 10,
+    where: {
+      id: {
+        gt: 4,
+        lte: 75,
+      },
+    },
     orderBy: [{ id: "asc" }],
     select: {
       id: true,
@@ -174,11 +184,16 @@ const usersTable = new PPP({ table: prisma.users });
   data = await prisma.users.findMany({
     skip: 34,
     take: 10,
+    where: {
+      id: {
+        gt: 4,
+        lte: 75,
+      },
+      deleted: true,
+    },
     orderBy: [{ id: "asc" }],
-    where: { deleted: true },
     select: {
       id: true,
     },
   });
 })();
-```
