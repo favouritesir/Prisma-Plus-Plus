@@ -39,6 +39,7 @@ model Post {
   content   String?
   authorId  Int
   likes     Int      @default(0)
+  tags      String[] @db.VarChar(50)
   createdAt DateTime @default(now()) @db.Timestamp()
   updatedAt DateTime @updatedAt @db.Timestamp()
   deleted   Boolean  @default(false)
