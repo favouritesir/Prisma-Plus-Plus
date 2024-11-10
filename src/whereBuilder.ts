@@ -7,6 +7,8 @@
  *
  */
 
+import { JsonBoundary } from "json-boundary";
+
 type opsType = {
   [key: string]: string;
 };
@@ -28,7 +30,20 @@ const ops: opsType = {
   "@!": `"isEmpty":`,
   "!(": `"NOT":(`,
 };
+
+const JB = new JsonBoundary();
+
+/**
+ * build where
+ * @param condition:string; like "id<100"
+ * @returns object like {id:{lt:100}}
+ ************************************************************************************************* BUILD WHERE OBJ
+ */
 export const buildWhere = (con: string) => {
+  // get a simple form of json string
+  const { id, str } = JB.getSimple(con, "###");
+  con = str;
+
   /**
    * formate the keys
    * @input a>12
@@ -37,19 +52,19 @@ export const buildWhere = (con: string) => {
   con = con
     .replace(/\n|\s|\t/g, "")
     .replace(
-      /((,|\w+)?\s*?((>>|<<|<=|>=|=|!=|<|>|\^|\$|\:\:|@!|@\*|@\?|@|!\()\s*?(\d+|\[[^\]]*\]|"[^"]*"|'[^']*'|true|flase),?)+)/g,
-      function (match, _, g2): string {
-        return `"${g2}":{${match.replace(g2, "")}}`;
+      /(\w+)?([><=!@^$:?*]{1,2}(\d+|###|true|false),?)+/g,
+      function (match, g1): string {
+        return `"${g1}":{${match.replace(g1, "")}}`;
       }
     );
 
-  /**
-   * formate the operators
-   * @input "a":{>12}
-   * @output "a":{"gt":12}
-   */
-  const regex = /(>>|<<|<=|>=|=|!=|<|>|\^|\$|\:\:|@!|@\*|@\?|@|!\()/g;
-  con = con.replace(regex, (m) => ops[m]);
+  // /**
+  //  * formate the operators
+  //  * @input "a":{>12}
+  //  * @output "a":{"gt":12}
+  //  */
+  const regex = /([><=!@^$:?*]{1,2}|!\()(\d+|###|"|true|false)/gi;
+  con = con.replace(regex, (_, g1, g2) => ops[g1] + g2);
 
   /**
    * handle nested parentheses and logical operators
@@ -63,8 +78,8 @@ export const buildWhere = (con: string) => {
         const start = arr.pop() || 0;
 
         let str = conLogicHandler(con.substring(start, i + extra + 1));
-        // console.log(str);
-        str = con[start - 1] == ":" ? `{${str.slice(1, -1)}}` : str; //`${str.slice(1, -1)}`;
+
+        str = con[start - 1] == ":" ? `{${str.slice(1, -1)}}` : str;
 
         con = con.slice(0, start + 1) + str + con.slice(i + extra + 1);
         extra = str.length - (i - start);
@@ -83,7 +98,10 @@ export const buildWhere = (con: string) => {
    * so here we add extra character which may be any without colon (:)
    */
   con = conLogicHandler(con);
-  // console.log(con);
+
+  // replace original string
+  con = JB.replaceOriginal(con, id);
+
   try {
     return JSON.parse(`{${con}}`);
   } catch (error) {
@@ -100,15 +118,5 @@ const conLogicHandler = (con: string) => {
 
   const andCons = con.split("&&");
   con = andCons.length > 1 ? `"AND":[{${andCons.join("},{")}}]` : con;
-  // console.log(con);
   return con;
 };
-
-console.log(
-  JSON.stringify(
-    buildWhere(
-      // `(age > 20,<50,!=30 || year=2024 && (!(status = 'active') && (status != 'pending')))`
-      `age > 18 , < 30 || (!(status = "inactive") && (role != "admin" || location="NY"))`
-    )
-  )
-);
