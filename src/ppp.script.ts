@@ -1,5 +1,3 @@
-import { fixedJsonBigInt } from "./Utils/utils";
-import { DBTableType } from "./interfaces";
 // ============================================================================================
 // ===================================== PRISMA PLUS PLUS =====================================
 // ============================================================================================
@@ -9,6 +7,8 @@ import { DBTableType } from "./interfaces";
 // VERSION      : v1.0.0
 // Date         : Thursday, 31 -October-2024 (15:40:08)
 // ============================================================================================
+import { fixedJsonBigInt } from "./Utils/utils";
+import { buildWhere } from "./whereBuilder";
 
 export interface QueryType {
   where?: any;
@@ -21,29 +21,51 @@ export interface QueryType {
   distinct?: any;
   include?: object;
 }
-export interface DBTablePropertyType {
+export interface optionType {
   query?: QueryType;
-  fields?: string[]; // table header fields
   totalRows?: number; // total rows in the table
-  table: DBTableType;
 }
 
-export class DBTable {
+export interface DBTableType {
+  aggregate?: any;
+  count?: any;
+  create?: any;
+  createMany?: any;
+  update?: any;
+  updateMany?: any;
+  upsert?: any;
+  createManyAndReturn?: any;
+  delete?: any;
+  deleteMany?: any;
+  fields?: any;
+  findFirst?: any;
+  findFirstOrThrow?: any;
+  findUnique?: any;
+  findUniqueOrThrow?: any;
+  findMany?: any;
+  groupBy?: any;
+}
+
+export class PPP<Feilds, WhereInput, select, include> {
   private query: QueryType = {};
   private totalRows: number = 0; // total rows in the table
   private table: DBTableType;
   private errValue: any = undefined;
-  constructor(options: DBTablePropertyType) {
-    this.table = options.table;
-    if (options.totalRows) this.totalRows = options.totalRows;
-    if (options.query) this.query = { ...options.query };
+
+  /************************************************************************************************* CONSTRUCTOR */
+  constructor(table: DBTableType, options?: optionType) {
+    this.table = table;
+
+    if (options) {
+      this.totalRows = options.totalRows || 0;
+      this.query = { ...options.query };
+    }
   }
 
   /************************************************************************************************* NEW INSTANT MAKER */
   private getInstant() {
-    return new DBTable({
-      table: this.table,
-      query: this.query,
+    return new PPP(this.table, {
+      query: { ...this.query },
       totalRows: this.totalRows,
     });
   }
@@ -84,20 +106,20 @@ export class DBTable {
     return this.getIfErr(val);
   }
   /************************************************************************************************* WHERE OBJECT */
-  where(cond: string | object) {
-    // const condition = typeof cond === "string" ? buildWhere(cond) : cond;
-    // this.query.where = this.query.where
-    //   ? { ...this.query.where, ...condition }
-    //   : { ...condition };
+  where(cond: string | WhereInput) {
+    const condition = typeof cond === "string" ? buildWhere(cond) : cond;
+    this.query.where = this.query.where
+      ? { ...this.query.where, ...condition }
+      : { ...condition };
 
     return this.getInstant();
   }
 
-  when(cond: string | object) {
+  when(cond: string | WhereInput) {
     return this.where(cond); // alternative to increase the readability of the where query
   }
 
-  if(cond: string | object) {
+  if(cond: string | WhereInput) {
     return this.where(cond); // alternative to increase the readability of the where query
   }
 

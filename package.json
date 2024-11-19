@@ -1,12 +1,15 @@
 {
-  "name": "prisma++",
-  "version": "1.0.0",
+  "name": "prisma-pp",
+  "version": "0.0.1",
   "description": "Write clean, readable, and meaningful code effortlessly with Prisma++.",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js"
+  },
+  "bin": {
+    "ppp-sync": "./bin/sync.js"
   },
   "repository": {
     "type": "git",
@@ -25,7 +28,7 @@
   },
   "homepage": "https://github.com/favouritesir/Prisma-Plus-Plus#readme",
   "dependencies": {
-    "@prisma/client": "^5.21.1",
+    "@prisma/client": "^5.22.0",
     "json-boundary": "^2.0.0"
   }
 }
